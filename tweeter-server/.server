@@ -1,0 +1,6 @@
+BUCKET='tweeter-vince-bucket'
+LAMBDA_ROLE='arn:aws:iam::027525286683:role/cs340script'
+EDIT_LAMBDALIST='
+tweeterGetFollowees | lambda/follow/GetFolloweesLambda.handler
+'
+LAMBDALAYER_ARN='arn:aws:lambda:us-east-2:027525286683:layer:tweeterLambdaLayer:10'

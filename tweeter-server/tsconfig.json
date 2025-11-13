@@ -1,19 +1,19 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
-    "outDir": "./dist",
-    "module": "nodenext",
     "target": "esnext",
-    "types": [],
-    "sourceMap": true,
+    "useDefineForClassFields": true,
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
     "declaration": true,
-    "declarationMap": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "esModuleInterop": true,
+
+    "moduleResolution": "node",
+
 
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
