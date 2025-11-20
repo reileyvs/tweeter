@@ -1,14 +1,16 @@
-import { AuthToken, Status, FakeData } from "tweeter-shared";
+import { AuthToken, Status, StatusDto, PagedItemRequest, PostStatusRequest } from "tweeter-shared";
+import { ServerFacade } from "../network/ServerFacade";
 
 export class StatusService {
+  private facade: ServerFacade = new ServerFacade();
   async loadMoreFeedItems(
     authToken: AuthToken,
     userAlias: string,
     pageSize: number,
     lastItem: Status | null
   ): Promise<[Status[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+    const request = this.createPagedRequest(authToken, userAlias, pageSize, lastItem);
+    return await this.facade.loadMoreStatusItems(request, "/status/feed/list", "feeds");
   };
   async loadMoreStoryItems(
     authToken: AuthToken,
@@ -16,16 +18,31 @@ export class StatusService {
     pageSize: number,
     lastItem: Status | null
   ): Promise<[Status[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+    const request = this.createPagedRequest(authToken, userAlias, pageSize, lastItem);
+    return await this.facade.loadMoreStatusItems(request, "/status/story/list", "stories");
   };
   async postStatus(
     authToken: AuthToken,
     newStatus: Status
   ): Promise<void> {
-    // Pause so we can see the logging out message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server to post the status
+    const request: PostStatusRequest = {
+      token: authToken.token,
+      statusDto: newStatus.dto
+    }
+    this.facade.postStatus(request);
   };
+  createPagedRequest(
+      token: AuthToken,
+      userAlias: string,
+      pageSize: number,
+      lastUser: Status | null
+    ): PagedItemRequest<StatusDto> {
+      const lastUserDto = lastUser ? lastUser.dto : null;
+      return {
+        token: token.token,
+        userAlias,
+        pageSize,
+        lastItem: lastUserDto,
+      };
+    }
 }

@@ -1,26 +1,35 @@
 import { Buffer } from "buffer";
-import { AuthToken, User, FakeData } from "tweeter-shared";
+import { AuthToken, User, ItemRequest, LoginRequest, RegisterRequest } from "tweeter-shared";
+import { ServerFacade } from "../network/ServerFacade";
 
 export class UserService {
+  facade: ServerFacade = new ServerFacade();
+
   async getUser(
     authToken: AuthToken,
     alias: string
   ): Promise<User | null> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.findUserByAlias(alias);
+    const request: ItemRequest = {
+      token: authToken.token,
+      userAlias: alias
+    }
+    return await this.facade.getUser(request);
   };
   async login(
     alias: string,
     password: string
   ): Promise<[User, AuthToken]> {
     // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
-
+    const request: LoginRequest = {
+      token: "",
+      userAlias: alias,
+      password: password
+    }
+    const [user, authToken] = await this.facade.login(request);
     if (user === null) {
       throw new Error("Invalid alias or password");
     }
-
-    return [user, FakeData.instance.authToken];
+    return [user, authToken];
   };
     async register(
     firstName: string,
@@ -33,18 +42,24 @@ export class UserService {
     // Not neded now, but will be needed when you make the request to the server in milestone 3
     const imageStringBase64: string =
       Buffer.from(userImageBytes).toString("base64");
+    const request: RegisterRequest = {
+      token: "",
+      firstName: firstName,
+      lastName,
+      alias,
+      password,
+      userImageBytes: imageStringBase64,
+      imageFileExtension
+    }
+    const [user, authToken] = await this.facade.register(request);
 
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
-
-    if (user === null) {
+    if (user === null || authToken === null) {
       throw new Error("Invalid registration");
     }
 
-    return [user, FakeData.instance.authToken];
+    return [user, authToken];
   };
   async logout(authToken: AuthToken): Promise<void> {
-    // Pause so we can see the logging out message. Delete when the call to the server is implemented.
-    await new Promise((res) => setTimeout(res, 1000));
+    await this.facade.logout(authToken);
   };
 }

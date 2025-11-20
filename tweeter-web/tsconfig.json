@@ -23,5 +23,5 @@
   },
   "include": [
     "src"
-  ]
+, "src/network", "src/network/ClientCommunicato../tweeter-shared/src/model/net/network/ServerFacade.tsacade.ts", "test/network/ServerFacade.test.ts"  ]
 }

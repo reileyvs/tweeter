@@ -1,72 +1,106 @@
-import { AuthToken, User, FakeData } from "tweeter-shared";
-
+import {
+  AuthToken,
+  User,
+  FakeData,
+  PagedItemRequest,
+  ItemRequest,
+  IsFollowerRequest,
+  UserDto,
+} from "tweeter-shared";
+import { ServerFacade } from "../network/ServerFacade";
 export class FollowService {
+  facade: ServerFacade = new ServerFacade();
+
   async loadMoreFollowees(
-    authToken: AuthToken,
+    token: AuthToken,
     userAlias: string,
     pageSize: number,
     lastUser: User | null
   ): Promise<[User[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfUsers(lastUser, pageSize, userAlias);
-  };
+    const itemRequest = this.createPagedRequest(
+      token,
+      userAlias,
+      pageSize,
+      lastUser
+    );
+    const [users, hasMore] = await this.facade.getMoreFollows(itemRequest, "/followee/list", "followees");
+    return [users, hasMore];
+  }
   async loadMoreFollowers(
-    authToken: AuthToken,
+    token: AuthToken,
     userAlias: string,
     pageSize: number,
     lastUser: User | null
   ): Promise<[User[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfUsers(lastUser, pageSize, userAlias);
-  };
-  async getFollowerCount(
-    authToken: AuthToken,
-    user: User
-  ): Promise<number> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getFollowerCount(user.alias);
-  };
+    const itemRequest = this.createPagedRequest(
+      token,
+      userAlias,
+      pageSize,
+      lastUser
+    );
+    const [users, hasMore] = await this.facade.getMoreFollows(itemRequest, "/follower/list", "followers");
+    return [users, hasMore];
+  }
+  async getFollowerCount(token: AuthToken, user: User): Promise<number> {
+    const itemRequest = this.createUserRequest(token, user);
+    return this.facade.getFollowCount(itemRequest, "follower");
+  }
+  async getFolloweeCount(token: AuthToken, user: User): Promise<number> {
+    const itemRequest = this.createUserRequest(token, user);
+    return this.facade.getFollowCount(itemRequest, "followee");
+  }
   async getIsFollowerStatus(
     authToken: AuthToken,
     user: User,
     selectedUser: User
   ): Promise<boolean> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.isFollower();
-  };
-  async getFolloweeCount(
-    authToken: AuthToken,
-    user: User
-  ): Promise<number> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getFolloweeCount(user.alias);
-  };
+    const request: IsFollowerRequest = {
+      token: authToken.token,
+      userAlias: user.alias,
+      followerAlias: selectedUser.alias
+    }
+    return this.facade.isFollower(request);
+  }
   async follow(
-    authToken: AuthToken,
+    token: AuthToken,
     userToFollow: User
   ): Promise<[followerCount: number, followeeCount: number]> {
-    // Pause so we can see the follow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server
-
-    const followerCount = await this.getFollowerCount(authToken, userToFollow);
-    const followeeCount = await this.getFolloweeCount(authToken, userToFollow);
-
+    const request: ItemRequest = {
+      token: token.token,
+      userAlias: userToFollow.alias
+    }
+    const [followerCount, followeeCount] = await this.facade.changeFollowStatus(request, "/follow")
     return [followerCount, followeeCount];
-  };
+  }
   async unfollow(
-    authToken: AuthToken,
+    token: AuthToken,
     userToUnfollow: User
   ): Promise<[followerCount: number, followeeCount: number]> {
-    // Pause so we can see the unfollow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server
-
-    const followerCount = await this.getFollowerCount(authToken, userToUnfollow);
-    const followeeCount = await this.getFolloweeCount(authToken, userToUnfollow);
-
+    const request: ItemRequest = {
+      token: token.token,
+      userAlias: userToUnfollow.alias
+    }
+    const [followerCount, followeeCount] = await this.facade.changeFollowStatus(request, "/unfollow")
     return [followerCount, followeeCount];
-  };
+  }
+  createUserRequest(token: AuthToken, user: User): ItemRequest {
+    return {
+      token: token.token,
+      userAlias: user.alias,
+    };
+  }
+  createPagedRequest(
+    token: AuthToken,
+    userAlias: string,
+    pageSize: number,
+    lastUser: User | null
+  ): PagedItemRequest<UserDto> {
+    const lastUserDto = lastUser ? lastUser.dto : null;
+    return {
+      token: token.token,
+      userAlias,
+      pageSize,
+      lastItem: lastUserDto,
+    };
+  }
 }

@@ -1,8 +1,0 @@
-import type { UserDto } from "../../dto/UserDto.js";
-
-export interface PagedUserItemRequest {
-  readonly token: string,
-  readonly userAlias: string,
-  readonly pageSize: number,
-  readonly lastUser: UserDto | null
-}
