@@ -29,7 +29,7 @@ export class StatusService {
       token: authToken.token,
       statusDto: newStatus.dto
     }
-    this.facade.postStatus(request);
+    return this.facade.postStatus(request);
   };
   createPagedRequest(
       token: AuthToken,
