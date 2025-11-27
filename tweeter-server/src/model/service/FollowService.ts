@@ -91,8 +91,9 @@ export class FollowService {
     return [followerCount, followeeCount];
   }
 
-  private authenticate(token: string): boolean {
-    if (this.sessionDao.isAuthenticated(token)) {
+  private async authenticate(token: string): Promise<boolean> {
+    if (await this.sessionDao.get(token)) {
+      this.sessionDao.update(token, Date.now())
       return true;
     } else {
       throw new Error("Not authorized");

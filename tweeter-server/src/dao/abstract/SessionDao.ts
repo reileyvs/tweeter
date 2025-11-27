@@ -1,7 +1,8 @@
 import { AuthToken } from "tweeter-shared"
 
 export interface SessionDao {
-  isAuthenticated(token: string): boolean
-  addSession(token: string, timestamp: number): AuthToken
-  clearSession(token: string): void
+  get(token: string): Promise<any>
+  put(authToken: AuthToken): Promise<void>
+  update(token: string, timestamp: number): Promise<void>
+  delete(token: string): Promise<void>
 }
