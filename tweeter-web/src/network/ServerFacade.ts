@@ -18,6 +18,7 @@ import {
   StatusDto,
   Status,
   PostStatusRequest,
+  FollowRequest,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
 
@@ -68,11 +69,11 @@ export class ServerFacade {
     return response.value;
   }
   public async changeFollowStatus(
-    request: ItemRequest,
+    request: FollowRequest,
     path: "/follow" | "/unfollow"
   ): Promise<[followerCount: number, followeeCount: number]> {
     const response = await this.clientCommunicator.doPost<
-      ItemRequest,
+      FollowRequest,
       FollowResponse
     >(request, path);
     this.errorCheck(response);

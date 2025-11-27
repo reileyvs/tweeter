@@ -11,7 +11,7 @@ export interface UserDao {
   ): User | null;
   login(alias: string, password: string): User | null;
   getUser(userAlias: string): User | null;
-  getBatchOfUsers(aliases: string[]): User[] | null;
+  getBatchOfUsers(aliases: string[]): (User | undefined)[] | null;
   getFolloweeCount(alias: string): number;
   getFollowerCount(alias: string): number;
   addFollower(alias: string): number;

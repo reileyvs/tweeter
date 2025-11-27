@@ -1,4 +1,4 @@
-import { AuthToken, Status, FakeData } from "tweeter-shared";
+import { Status, FakeData } from "tweeter-shared";
 import { SessionDao } from "../../dao/abstract/SessionDao";
 import { FeedDao } from "../../dao/abstract/FeedDao";
 import { StoryDao } from "../../dao/abstract/StoryDao";
@@ -27,9 +27,8 @@ export class StatusService {
     pageSize: number,
     lastItem: Status | null
   ): Promise<[Status[], boolean]> {
-    //authenticate
-    //getFeed()
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+    this.authenticate(authToken)
+    return this.feedDao.getBatchOfFeed(userAlias, pageSize, lastItem);
   }
   async loadMoreStoryItems(
     authToken: string,
@@ -37,18 +36,15 @@ export class StatusService {
     pageSize: number,
     lastItem: Status | null
   ): Promise<[Status[], boolean]> {
-    //authenticate
-    //getStories()
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+    this.authenticate(authToken)
+    return this.storyDao.getBatchOfStories(userAlias, pageSize, lastItem)
   }
   async postStatus(authToken: string, newStatus: Status): Promise<void> {
-    //authenticate
-    //StoryDao.addStory(newStatus.user.alias)
-    //FollowDao.getFollowers(newStatus.user.alias)
-    //FeedDao.addFeedItem(newStatus, followers[])
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server to post the status
+    this.authenticate(authToken)
+    this.storyDao.addStory(newStatus.user.alias)
+    //for loop for getting all followers
+    const page = await this.followDao.getPageOfFollowers(newStatus.user.alias, 10, undefined)
+    this.feedDao.addFeedItem(newStatus, page.values.map(follow => follow.followerHandle))
   }
 
   private authenticate(token: string): boolean {

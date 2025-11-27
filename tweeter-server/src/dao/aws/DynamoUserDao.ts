@@ -1,18 +1,19 @@
-import { User } from "tweeter-shared";
+import { FakeData, User } from "tweeter-shared";
 import { UserDao } from "../abstract/UserDao";
 
 export class DynamoUserDao implements UserDao {
   register(firstName: string, lastName: string, alias: string, password: string, userImageBytes: string, imageFileExtension: string): User | null {
-    return null
+    return FakeData.instance.firstUser
   }
   login(alias: string, password: string): User | null {
-    return null
+    return FakeData.instance.firstUser
   }
   getUser(userAlias: string): User | null {
-    return null
+    return FakeData.instance.findUserByAlias(userAlias);
   }
-  getBatchOfUsers(aliases: string[]): User[] {
-    return []
+  getBatchOfUsers(aliases: string[]): (User | undefined)[] {
+    const users = aliases.map(alias => FakeData.instance.fakeUsers.find(user => user.alias == alias));
+    return users
   }
   getFolloweeCount(alias: string): number {
     return 3

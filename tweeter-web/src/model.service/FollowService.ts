@@ -5,6 +5,7 @@ import {
   ItemRequest,
   IsFollowerRequest,
   UserDto,
+  FollowRequest,
 } from "tweeter-shared";
 import { ServerFacade } from "../network/ServerFacade";
 export class FollowService {
@@ -62,22 +63,26 @@ export class FollowService {
   }
   async follow(
     token: AuthToken,
+    currentUser: User,
     userToFollow: User
   ): Promise<[followerCount: number, followeeCount: number]> {
-    const request: ItemRequest = {
+    const request: FollowRequest = {
       token: token.token,
-      userAlias: userToFollow.alias
+      userAlias: currentUser.alias,
+      displayedUser: userToFollow.alias,
     }
     const [followerCount, followeeCount] = await this.facade.changeFollowStatus(request, "/follow")
     return [followerCount, followeeCount];
   }
   async unfollow(
     token: AuthToken,
+    currentUser: User,
     userToUnfollow: User
   ): Promise<[followerCount: number, followeeCount: number]> {
-    const request: ItemRequest = {
+    const request: FollowRequest = {
       token: token.token,
-      userAlias: userToUnfollow.alias
+      userAlias: currentUser.alias,
+      displayedUser: userToUnfollow.alias
     }
     const [followerCount, followeeCount] = await this.facade.changeFollowStatus(request, "/unfollow")
     return [followerCount, followeeCount];

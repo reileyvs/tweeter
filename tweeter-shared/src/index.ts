@@ -16,6 +16,7 @@ export type { IsFollowerRequest } from "./model/net/request/IsFollowerRequest.js
 export type { LoginRequest } from "./model/net/request/LoginRequest.js"
 export type { RegisterRequest } from "./model/net/request/RegisterRequest.js"
 export type { PostStatusRequest } from "./model/net/request/PostStatusRequest.js"
+export type { FollowRequest } from "./model/net/request/FollowRequest.js"
 
 export type { UserCountResponse } from "./model/net/response/UserCountResponse.js"
 export type { TweeterResponse } from "./model/net/response/TweeterResponse.js"

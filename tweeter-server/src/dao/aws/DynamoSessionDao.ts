@@ -1,4 +1,4 @@
-import { AuthToken } from "tweeter-shared";
+import { AuthToken, FakeData } from "tweeter-shared";
 import { SessionDao } from "../abstract/SessionDao";
 
 export class DynamoSessionDao implements SessionDao {
@@ -6,7 +6,7 @@ export class DynamoSessionDao implements SessionDao {
     return true
   }
   addSession(token: string, timestamp: number): AuthToken {
-    return new AuthToken("", 0)
+    return FakeData.instance.authToken
   }
   clearSession(token: string): void {
     

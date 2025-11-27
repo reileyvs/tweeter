@@ -22,24 +22,21 @@ export class UserService {
     token: string,
     alias: string
   ): Promise<User | null> {
-    //authenticate
-    //UserDao.getUser(alias)
     this.authenticate(token)
-    const user: User | null = this.userDao.getUser(alias)
-    return FakeData.instance.findUserByAlias(alias);
+    return this.userDao.getUser(alias)
   };
   async login(
     alias: string,
     password: string
   ): Promise<[User, AuthToken]> {
-    //UserDao.login(alias, password) -- get back a User or null
-    const user = FakeData.instance.firstUser;
+    const user = this.userDao.login(alias, password)
 
     if (user === null) {
       throw new Error("Invalid alias or password");
     }
+    const authToken = FakeData.instance.authToken
 
-    return [user, FakeData.instance.authToken];
+    return [user, this.sessionDao.addSession(authToken.token, authToken.timestamp)];
   };
     async register(
     firstName: string,
@@ -56,19 +53,19 @@ export class UserService {
     const imageStringBase64: string =
       Buffer.from(userImageBytes).toString("base64");
 
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
+    const user = this.userDao.register(firstName, lastName, alias, password, imageStringBase64, imageFileExtension);
 
     if (user === null) {
       throw new Error("Invalid registration");
     }
 
-    return [user, FakeData.instance.authToken];
+    const authToken = FakeData.instance.authToken
+
+    return [user, this.sessionDao.addSession(authToken.token, authToken.timestamp)];
   };
   async logout(authToken: AuthToken): Promise<void> {
-    //authenticate
-    //sessionDao.clearSession()
-    // Pause so we can see the logging out message. Delete when the call to the server is implemented.
+    this.authenticate(authToken.token)
+    this.sessionDao.clearSession(authToken.token)
     await new Promise((res) => setTimeout(res, 1000));
   };
 

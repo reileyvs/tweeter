@@ -1,9 +1,9 @@
-import { Status } from "tweeter-shared";
+import { FakeData, Status } from "tweeter-shared";
 import { StoryDao } from "../abstract/StoryDao";
 
 export class DynamoStoryDao implements StoryDao {
-  getStories(userAlias: string, pageSize: number, lastItem: Status): Status[] {
-    return []
+  getBatchOfStories(userAlias: string, pageSize: number, lastItem: Status | null): [Status[], boolean] {
+    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
   }
   addStory(userAlias: string): void {
     

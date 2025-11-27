@@ -18,6 +18,7 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
 
   followOrUnfollow = async (
     event: React.MouseEvent,
+    currentUser: User | null,
     displayedUser: User | null,
     authToken: AuthToken,
     type: string,
@@ -25,6 +26,7 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
     errorType: string,
     followDecide: (
       authToken: AuthToken,
+      currentUser: User,
       userToChange: User
     ) => Promise<[number, number]>
   ): Promise<void> => {
@@ -41,6 +43,7 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
 
       const [followerCount, followeeCount] = await followDecide(
         authToken!,
+        currentUser!,
         displayedUser!
       );
 
@@ -58,11 +61,13 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
   };
   followDisplayedUser = async (
     event: React.MouseEvent,
+    currentUser: User | null,
     displayedUser: User | null,
     authToken: AuthToken
   ): Promise<void> => {
     this.followOrUnfollow(
       event,
+      currentUser,
       displayedUser,
       authToken,
       "Following",
@@ -73,11 +78,13 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
   };
   unfollowDisplayedUser = async (
     event: React.MouseEvent,
+    currentUser: User | null,
     displayedUser: User | null,
     authToken: AuthToken
   ): Promise<void> => {
     this.followOrUnfollow(
       event,
+      currentUser,
       displayedUser,
       authToken,
       "Unfollowing",
@@ -136,16 +143,18 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
 
   follow = async (
     authToken: AuthToken,
+    currentUser: User,
     userToFollow: User
   ): Promise<[followerCount: number, followeeCount: number]> => {
-    return this.service.follow(authToken, userToFollow);
+    return this.service.follow(authToken, currentUser, userToFollow);
   }
 
   unfollow = async (
     authToken: AuthToken,
+    currentUser: User,
     userToUnfollow: User
   ): Promise<[followerCount: number, followeeCount: number]> => {
-    return this.service.unfollow(authToken, userToUnfollow);
+    return this.service.unfollow(authToken, currentUser, userToUnfollow);
   }
 
   getBaseUrl(location: Location): string {

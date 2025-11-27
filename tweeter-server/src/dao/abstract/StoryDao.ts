@@ -1,6 +1,6 @@
 import { Status } from "tweeter-shared";
 
 export interface StoryDao {
-  getStories(userAlias: string, pageSize: number, lastItem: Status): Status[]
+  getBatchOfStories(userAlias: string, pageSize: number, lastItem: Status | null): [Status[], boolean]
   addStory(userAlias: string): void
 }

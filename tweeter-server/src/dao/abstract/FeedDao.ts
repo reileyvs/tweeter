@@ -1,6 +1,6 @@
 import { Status, User } from "tweeter-shared";
 
 export interface FeedDao {
-  getFeed(userAlias: string, pageSize: number, lastItem: Status): Status[]
-  addFeedItem(post: Status, followers: User[]): void
+  getBatchOfFeed(userAlias: string, pageSize: number, lastItem: Status | null): [Status[], boolean]
+  addFeedItem(post: Status, followers: string[]): void
 }

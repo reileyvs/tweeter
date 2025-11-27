@@ -1,11 +1,11 @@
-import { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS } from "react";
-import { AuthToken, FakeData, User, type UserDto } from "tweeter-shared";
+import { Follow, User, type UserDto } from "tweeter-shared";
 import { UserDao } from "../../dao/abstract/UserDao";
 import { SessionDao } from "../../dao/abstract/SessionDao";
 import { FollowDao } from "../../dao/abstract/FollowDao";
 import { UserDaoFactory } from "../../dao/factory/UserDaoFactory";
 import { SessionDaoFactory } from "../../dao/factory/SessionDaoFactory";
 import { FollowDaoFactory } from "../../dao/factory/FollowDaoFactory";
+import { Follows } from "../../dao/aws/entity/Follows";
 
 export class FollowService {
   userDao: UserDao;
@@ -25,10 +25,10 @@ export class FollowService {
     lastUser: UserDto | null
   ): Promise<[UserDto[], boolean]> {
     this.authenticate(token)
-    const [items, hasMore] = this.followDao.getBatchOfFollowees(userAlias, pageSize, User.fromDto(lastUser))
-    const users = this.userDao.getBatchOfUsers(items)
-    const dtos = users ? users.map((user: User) => user.dto) : [];
-    return [dtos, hasMore];
+    const page = await this.followDao.getPageOfFollowees(userAlias, pageSize, lastUser?.alias)
+    const users = this.userDao.getBatchOfUsers(page.values.map(value => value.followeeHandle))
+    const dtos = users ? users.map((user: User | undefined) => user!.dto) : [];
+    return [dtos, page.hasMorePages];
   }
   async loadMoreFollowers(
     token: string,
@@ -37,18 +37,18 @@ export class FollowService {
     lastUser: UserDto | null
   ): Promise<[UserDto[], boolean]> {
     this.authenticate(token)
-    const [items, hasMore] = this.followDao.getBatchOfFollowers(userAlias, pageSize, User.fromDto(lastUser))
-    const users = this.userDao.getBatchOfUsers(items)
-    const dtos = users ? users.map((user: User) => user.dto) : [];
-    return [dtos, hasMore];
+    const page = await this.followDao.getPageOfFollowers(userAlias, pageSize, lastUser?.alias)
+    const users = this.userDao.getBatchOfUsers(page.values.map(value => value.followerHandle))
+    const dtos = users ? users.map((user: User | undefined) => user!.dto) : [];
+    return [dtos, page.hasMorePages];
   }
   async getFollowerCount(token: string, userAlias: string): Promise<number> {
     this.authenticate(token)
-    return this.followDao.getAllFollowers(userAlias).length
+    return this.userDao.getFollowerCount(userAlias)
   }
   async getFolloweeCount(token: string, userAlias: string): Promise<number> {
     this.authenticate(token)
-    return this.followDao.getAllFollowees(userAlias).length
+    return this.userDao.getFolloweeCount(userAlias)
   }
   async getIsFollowerStatus(
     token: string,
@@ -56,17 +56,19 @@ export class FollowService {
     selectedUserAlias: string
   ): Promise<boolean> {
     this.authenticate(token)
-    const followers = this.followDao.getAllFollowers(userAlias)
-    const follower = followers.find(alias => alias === selectedUserAlias)
+    const follower = this.followDao.get(new Follows(userAlias, selectedUserAlias))
     return !!follower
   }
   async follow(
     token: string,
+    currentUser: string,
     userToFollow: string
   ): Promise<[followerCount: number, followeeCount: number]> {
     
     this.authenticate(token)
-    this.followDao.follow(userToFollow)
+    await this.followDao.put(new Follows(currentUser, userToFollow))
+    await this.userDao.addFollowee(currentUser)
+    await this.userDao.addFollower(userToFollow)
 
     const followerCount = await this.getFollowerCount(token, userToFollow);
     const followeeCount = await this.getFolloweeCount(token, userToFollow);
@@ -75,11 +77,13 @@ export class FollowService {
   }
   async unfollow(
     token: string,
+    currentUser: string,
     userToUnfollow: string
   ): Promise<[followerCount: number, followeeCount: number]> {
 
     this.authenticate(token)
-    this.followDao.follow(userToUnfollow)
+    const unfollow = new Follows(currentUser, userToUnfollow)
+    await this.followDao.delete(unfollow)
 
     const followerCount = await this.getFollowerCount(token, userToUnfollow);
     const followeeCount = await this.getFolloweeCount(token, userToUnfollow);

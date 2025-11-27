@@ -100,7 +100,7 @@ const UserInfo = () => {
                       className="btn btn-md btn-secondary me-1"
                       type="submit"
                       style={{ width: "6em" }}
-                      onClick={(event) => presenterRef.current!.unfollowDisplayedUser(event, displayedUser, authToken)}
+                      onClick={(event) => presenterRef.current!.unfollowDisplayedUser(event, currentUser, displayedUser, authToken)}
                     >
                       {isLoading ? (
                         <span
@@ -118,7 +118,7 @@ const UserInfo = () => {
                       className="btn btn-md btn-primary me-1"
                       type="submit"
                       style={{ width: "6em" }}
-                      onClick={(event) => presenterRef.current!.followDisplayedUser(event, displayedUser, authToken)}
+                      onClick={(event) => presenterRef.current!.followDisplayedUser(event, currentUser, displayedUser, authToken)}
                     >
                       {isLoading ? (
                         <span
